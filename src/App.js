@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useReactMediaRecorder } from "react-media-recorder-2";
 import "./App.css";
 import languages from "./languages";
 import audioToText from "./api.js";
@@ -7,11 +8,20 @@ function App() {
   const [fileLink, setFileLink] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [sections, setSections] = useState([]);
-
   const fileInputRef = useRef(null);
+  const [language, setLanguage] = useState("en");
+  const [recording, setRecording] = useState(false);
+  const { status, startRecording, stopRecording, mediaBlobUrl } =
+    useReactMediaRecorder({ audio: true });
 
-  const transcribeAudio = async function (audio) {
+  const blobToAudio = async (mediaBlobUrl) => {
+    const audioBlob = await fetch(mediaBlobUrl).then((r) => r.blob());
+    const audioFile = new File([audioBlob], "voice.wav", { type: "audio/wav" });
+    return audioFile;
+  };
+  const transcribeAudio = async function (audio, language) {
     const summaryChapters = await audioToText(audio);
+    if (!summaryChapters) return;
     setMeetingTitle(summaryChapters[0]?.gist);
     const newSections = summaryChapters.map((chapter, index) => (
       <Section
@@ -24,6 +34,7 @@ function App() {
     ));
     setSections(newSections);
   };
+
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
@@ -34,6 +45,7 @@ function App() {
       alert("Please select a file.");
       return;
     }
+    console.log(selectedFile);
     transcribeAudio(selectedFile);
   };
 
@@ -50,23 +62,47 @@ function App() {
             <img src="logo.png" alt="logo" className="header-logo" />
             <h2 className="heading">MidyAI Notetaker</h2>
           </div>
-          <form className="language">
-            <select name="input-language" id="language">
-              <option value="system">System Audio</option>
+          <div className="language">
+            <select
+              name="input-language"
+              id="language"
+              value={language}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+              }}
+            >
               {languages.map((language) => (
                 <option value={language.code} key={language.no}>
                   {language.name}
                 </option>
               ))}
             </select>
-            <button className="btn record">
-              <div className="icon">
-                <ion-icon name="mic-outline"></ion-icon>
-                <img src="bars.svg" alt="" />
-              </div>
-              <p>Start Listening</p>
-            </button>
-          </form>
+            <div>
+              <button
+                className={`btn record ${recording ? "recording" : ""}`}
+                onClick={() => {
+                  if (!recording) startRecording();
+                  else stopRecording();
+                  setRecording((rec) => !rec);
+                }}
+              >
+                <div className="icon">
+                  <ion-icon name="mic-outline"></ion-icon>
+                  <img src="bars.svg" alt="" />
+                </div>
+                <p>{recording ? "Listening" : "Start Listening"}</p>
+              </button>
+            </div>
+          </div>
+          <audio
+            src={mediaBlobUrl}
+            onCanPlay={async () => {
+              // console.log(mediaBlobUrl);
+              const audioObj = await blobToAudio(mediaBlobUrl);
+              // console.log(audioObj);
+              transcribeAudio(audioObj, language);
+            }}
+          />
           <form className="link-to-text" onSubmit={handleSubmit}>
             <input
               type="url"
@@ -107,7 +143,13 @@ function App() {
             <p>Download Note</p>
           </button>
           <img src="logo.png" alt="logo" className="logo" />
-          <button className="btn clear">
+          <button
+            className="btn clear"
+            onClick={() => {
+              setMeetingTitle("");
+              setSections([]);
+            }}
+          >
             <ion-icon name="trash-outline"></ion-icon>
             <p>Clear Note</p>
           </button>
