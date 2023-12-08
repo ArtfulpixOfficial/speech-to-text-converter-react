@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 // import { useReactMediaRecorder } from "react-media-recorder";
-// import { useReactMediaRecorder } from "react-media-recorder-2";
+import { useReactMediaRecorder } from "react-media-recorder-2";
 import "./App.css";
 import languages from "./languages";
 import audioToText from "./api.js";
@@ -12,8 +12,9 @@ function App() {
   const fileInputRef = useRef(null);
   const [language, setLanguage] = useState("en");
   const [recording, setRecording] = useState(false);
-  // const { status, startRecording, stopRecording, mediaBlobUrl } =
-  //   useReactMediaRecorder({ audio: true });
+  const { startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder(
+    { audio: true }
+  );
 
   const blobToAudio = async (mediaBlobUrl) => {
     const audioBlob = await fetch(mediaBlobUrl).then((r) => r.blob());
@@ -81,11 +82,11 @@ function App() {
             <div>
               <button
                 className={`btn record ${recording ? "recording" : ""}`}
-                // onClick={() => {
-                //   if (!recording) startRecording();
-                //   else stopRecording();
-                //   setRecording((rec) => !rec);
-                // }}
+                onClick={() => {
+                  if (!recording) startRecording();
+                  else stopRecording();
+                  setRecording((rec) => !rec);
+                }}
               >
                 <div className="icon">
                   <ion-icon name="mic-outline"></ion-icon>
@@ -95,7 +96,7 @@ function App() {
               </button>
             </div>
           </div>
-          {/* <audio
+          <audio
             src={mediaBlobUrl}
             onCanPlay={async () => {
               // console.log(mediaBlobUrl);
@@ -103,7 +104,7 @@ function App() {
               // console.log(audioObj);
               transcribeAudio(audioObj, language);
             }}
-          /> */}
+          />
           <form className="link-to-text" onSubmit={handleSubmit}>
             <input
               type="url"
