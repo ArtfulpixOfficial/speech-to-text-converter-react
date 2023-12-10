@@ -1,30 +1,34 @@
 import { useState, useRef } from "react";
-// import { useReactMediaRecorder } from "react-media-recorder";
 import { useReactMediaRecorder } from "react-media-recorder-2";
 import "./App.css";
 import languages from "./languages";
 import audioToText from "./api.js";
+import { saveAs } from "file-saver";
+import { Docxtemplater } from "docxtemplater";
 
 function App() {
   const [fileLink, setFileLink] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [sections, setSections] = useState([]);
   const fileInputRef = useRef(null);
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState("system");
   const [recording, setRecording] = useState(false);
   const { startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder(
     { audio: true }
   );
+  const [permissions, setPermissions] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState();
 
   const blobToAudio = async (mediaBlobUrl) => {
     const audioBlob = await fetch(mediaBlobUrl).then((r) => r.blob());
+    console.log(audioBlob);
     const audioFile = new File([audioBlob], "voice.wav", { type: "audio/wav" });
     return audioFile;
   };
   const transcribeAudio = async function (audio, language) {
     const summaryChapters = await audioToText(audio);
     if (!summaryChapters) return;
-    setMeetingTitle(summaryChapters[0]?.gist);
+    setMeetingTitle(summaryChapters[0]?.gist || summaryChapters[0]?.headline);
     const newSections = summaryChapters.map((chapter, index) => (
       <Section
         key={index}
@@ -73,6 +77,7 @@ function App() {
                 setLanguage(e.target.value);
               }}
             >
+              <option value={"system"}>System Audio</option>
               {languages.map((language) => (
                 <option value={language.code} key={language.no}>
                   {language.name}
@@ -81,27 +86,74 @@ function App() {
             </select>
             <div>
               <button
-                className={`btn record ${recording ? "recording" : ""}`}
-                onClick={() => {
-                  if (!recording) startRecording();
-                  else stopRecording();
-                  setRecording((rec) => !rec);
+                className={`btn record ${
+                  permissions && recording ? "recording" : ""
+                }`}
+                onClick={async () => {
+                  if (!permissions) {
+                    if (language === "system") {
+                      await navigator.mediaDevices
+                        .getDisplayMedia({
+                          audio: true,
+                        })
+                        .then((newStream) =>
+                          setMediaRecorder(new MediaRecorder(newStream))
+                        );
+                    }
+                    setPermissions(true);
+                  } else if (permissions && !recording) {
+                    if (language === "system") {
+                      mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                          const audioBlob = new Blob([event.data], {
+                            type: "audio/wav",
+                          });
+                          const audioFile = new File(
+                            [audioBlob],
+                            "recording.wav",
+                            {
+                              type: "audio/wav",
+                            }
+                          );
+                          transcribeAudio(audioFile);
+                        }
+                      };
+                      mediaRecorder.start();
+                    } else {
+                      startRecording();
+                    }
+                    setRecording(true);
+                  } else {
+                    if (language === "system") {
+                      mediaRecorder.stream
+                        .getTracks()
+                        .forEach((track) => track.stop());
+                    } else {
+                      stopRecording();
+                    }
+                    setRecording(false);
+                    setPermissions(false);
+                  }
                 }}
               >
                 <div className="icon">
                   <ion-icon name="mic-outline"></ion-icon>
                   <img src="bars.svg" alt="" />
                 </div>
-                <p>{recording ? "Listening" : "Start Listening"}</p>
+                <p>{`${
+                  !permissions && !recording
+                    ? "Get Permissions"
+                    : permissions && !recording
+                    ? "Start Listening"
+                    : "Listening"
+                } `}</p>
               </button>
             </div>
           </div>
           <audio
             src={mediaBlobUrl}
             onCanPlay={async () => {
-              // console.log(mediaBlobUrl);
               const audioObj = await blobToAudio(mediaBlobUrl);
-              // console.log(audioObj);
               transcribeAudio(audioObj, language);
             }}
           />
@@ -140,7 +192,12 @@ function App() {
       </div>
       <div className="notes">
         <div className="buttons">
-          <button className="btn download" disabled>
+          <button
+            className="btn download"
+            onClick={() => {
+              console.log(sections);
+            }}
+          >
             <ion-icon name="cloud-download-outline"></ion-icon>
             <p>Download Note</p>
           </button>
