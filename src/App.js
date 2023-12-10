@@ -3,8 +3,10 @@ import { useReactMediaRecorder } from "react-media-recorder-2";
 import "./App.css";
 import languages from "./languages";
 import audioToText from "./api.js";
+import Docxtemplater from "docxtemplater";
+import PizZip from "pizzip";
+import PizZipUtils from "pizzip/utils/index.js";
 import { saveAs } from "file-saver";
-import { Docxtemplater } from "docxtemplater";
 
 function App() {
   const [fileLink, setFileLink] = useState("");
@@ -18,7 +20,11 @@ function App() {
   );
   const [permissions, setPermissions] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState();
+  const [disableDownload, setDisableDownload] = useState(true);
 
+  function loadFile(url, callback) {
+    PizZipUtils.getBinaryContent(url, callback);
+  }
   const blobToAudio = async (mediaBlobUrl) => {
     const audioBlob = await fetch(mediaBlobUrl).then((r) => r.blob());
     console.log(audioBlob);
@@ -39,6 +45,7 @@ function App() {
       />
     ));
     setSections(newSections);
+    setDisableDownload(false);
   };
 
   const handleButtonClick = () => {
@@ -193,9 +200,38 @@ function App() {
       <div className="notes">
         <div className="buttons">
           <button
+            disabled={disableDownload}
             className="btn download"
-            onClick={() => {
-              console.log(sections);
+            onClick={async () => {
+              // Load the Word document template
+              loadFile("/template.docx", async function (error, content) {
+                if (error) {
+                  throw error;
+                }
+
+                // Create a new instance of Docxtemplater
+                const zip = new PizZip(content);
+                const doc = new Docxtemplater(zip);
+
+                // Provide data to fill in the placeholders
+                const data = {
+                  meetingTitle,
+                  notes: sections.map((section) => ({
+                    title: section.props.details.title,
+                    description: section.props.details.description,
+                  })),
+                };
+
+                // Replace placeholders with actual data
+                doc.setData(data);
+
+                // Process the template
+                doc.render();
+
+                // Save the generated document
+                const outputBuffer = doc.getZip().generate({ type: "blob" });
+                saveAs(outputBuffer, "meeting_notes.docx");
+              });
             }}
           >
             <ion-icon name="cloud-download-outline"></ion-icon>
@@ -207,6 +243,7 @@ function App() {
             onClick={() => {
               setMeetingTitle("");
               setSections([]);
+              setDisableDownload(true);
             }}
           >
             <ion-icon name="trash-outline"></ion-icon>
