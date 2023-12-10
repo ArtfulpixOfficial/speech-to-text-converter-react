@@ -25,13 +25,13 @@ function App() {
   function loadFile(url, callback) {
     PizZipUtils.getBinaryContent(url, callback);
   }
-  const blobToAudio = async (mediaBlobUrl) => {
+  async function blobToAudio(mediaBlobUrl) {
     const audioBlob = await fetch(mediaBlobUrl).then((r) => r.blob());
     console.log(audioBlob);
     const audioFile = new File([audioBlob], "voice.wav", { type: "audio/wav" });
     return audioFile;
-  };
-  const transcribeAudio = async function (audio, language) {
+  }
+  async function transcribeAudio(audio, language) {
     const summaryChapters = await audioToText(audio);
     if (!summaryChapters) return;
     setMeetingTitle(summaryChapters[0]?.gist || summaryChapters[0]?.headline);
@@ -46,13 +46,13 @@ function App() {
     ));
     setSections(newSections);
     setDisableDownload(false);
-  };
+  }
 
-  const handleButtonClick = () => {
+  function handleButtonClick() {
     fileInputRef.current.click();
-  };
+  }
 
-  const handleFileChange = async (event) => {
+  async function handleFileChange(event) {
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
       alert("Please select a file.");
@@ -60,13 +60,83 @@ function App() {
     }
     console.log(selectedFile);
     transcribeAudio(selectedFile);
-  };
+  }
 
-  const handleSubmit = async function (e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     transcribeAudio(fileLink);
-  };
+  }
 
+  async function handleDownload() {
+    // Load the Word document template
+    loadFile("/template.docx", async function (error, content) {
+      if (error) {
+        throw error;
+      }
+
+      // Create a new instance of Docxtemplater
+      const zip = new PizZip(content);
+      const doc = new Docxtemplater(zip);
+
+      // Provide data to fill in the placeholders
+      const data = {
+        meetingTitle,
+        notes: sections.map((section) => ({
+          title: section.props.details.title,
+          description: section.props.details.description,
+        })),
+      };
+
+      // Replace placeholders with actual data
+      doc.setData(data);
+
+      // Process the template
+      doc.render();
+
+      // Save the generated document
+      const outputBuffer = doc.getZip().generate({ type: "blob" });
+      saveAs(outputBuffer, "meeting_notes.docx");
+    });
+  }
+
+  async function handleRecordButton() {
+    if (!permissions) {
+      if (language === "system") {
+        await navigator.mediaDevices
+          .getDisplayMedia({
+            audio: true,
+          })
+          .then((newStream) => setMediaRecorder(new MediaRecorder(newStream)));
+      }
+      setPermissions(true);
+    } else if (permissions && !recording) {
+      if (language === "system") {
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            const audioBlob = new Blob([event.data], {
+              type: "audio/wav",
+            });
+            const audioFile = new File([audioBlob], "recording.wav", {
+              type: "audio/wav",
+            });
+            transcribeAudio(audioFile);
+          }
+        };
+        mediaRecorder.start();
+      } else {
+        startRecording();
+      }
+      setRecording(true);
+    } else {
+      if (language === "system") {
+        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      } else {
+        stopRecording();
+      }
+      setRecording(false);
+      setPermissions(false);
+    }
+  }
   return (
     <div className="main-container">
       <div className="container">
@@ -96,52 +166,7 @@ function App() {
                 className={`btn record ${
                   permissions && recording ? "recording" : ""
                 }`}
-                onClick={async () => {
-                  if (!permissions) {
-                    if (language === "system") {
-                      await navigator.mediaDevices
-                        .getDisplayMedia({
-                          audio: true,
-                        })
-                        .then((newStream) =>
-                          setMediaRecorder(new MediaRecorder(newStream))
-                        );
-                    }
-                    setPermissions(true);
-                  } else if (permissions && !recording) {
-                    if (language === "system") {
-                      mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                          const audioBlob = new Blob([event.data], {
-                            type: "audio/wav",
-                          });
-                          const audioFile = new File(
-                            [audioBlob],
-                            "recording.wav",
-                            {
-                              type: "audio/wav",
-                            }
-                          );
-                          transcribeAudio(audioFile);
-                        }
-                      };
-                      mediaRecorder.start();
-                    } else {
-                      startRecording();
-                    }
-                    setRecording(true);
-                  } else {
-                    if (language === "system") {
-                      mediaRecorder.stream
-                        .getTracks()
-                        .forEach((track) => track.stop());
-                    } else {
-                      stopRecording();
-                    }
-                    setRecording(false);
-                    setPermissions(false);
-                  }
-                }}
+                onClick={handleRecordButton}
               >
                 <div className="icon">
                   <ion-icon name="mic-outline"></ion-icon>
@@ -202,37 +227,7 @@ function App() {
           <button
             disabled={disableDownload}
             className="btn download"
-            onClick={async () => {
-              // Load the Word document template
-              loadFile("/template.docx", async function (error, content) {
-                if (error) {
-                  throw error;
-                }
-
-                // Create a new instance of Docxtemplater
-                const zip = new PizZip(content);
-                const doc = new Docxtemplater(zip);
-
-                // Provide data to fill in the placeholders
-                const data = {
-                  meetingTitle,
-                  notes: sections.map((section) => ({
-                    title: section.props.details.title,
-                    description: section.props.details.description,
-                  })),
-                };
-
-                // Replace placeholders with actual data
-                doc.setData(data);
-
-                // Process the template
-                doc.render();
-
-                // Save the generated document
-                const outputBuffer = doc.getZip().generate({ type: "blob" });
-                saveAs(outputBuffer, "meeting_notes.docx");
-              });
-            }}
+            onClick={handleDownload}
           >
             <ion-icon name="cloud-download-outline"></ion-icon>
             <p>Download Note</p>
