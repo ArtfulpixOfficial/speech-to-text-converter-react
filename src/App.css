@@ -30,15 +30,15 @@ body {
   display: flex;
   flex-direction: column; /* Cambia la dirección del contenedor a columna */
   align-items: center; /* Centra los elementos horizontalmente */
-  width: 30%; /* Ajusta el ancho según tus necesidades */
+  width: 20%; /* Ajusta el ancho según tus necesidades */
   max-width: 1920px; /* Establece un ancho máximo */
-  padding: 0 30px;
+  padding: 0 5px;
   /* border-radius: 10px; */
   background-color: var(--light-text-color);
 }
 
 .notes {
-  width: 70%;
+  width: 80%;
   border-radius: 10px;
   padding: 30px;
   background-color: var(--bg-color);
@@ -178,13 +178,13 @@ body {
 #audio-link {
   flex: 1 1 300%;
   min-height: 60px;
-  width: 90%;
+  width: 98%;
   padding: 0 10px;
 }
 
 .link-to-text .btn {
   margin: 30px 0;
-  width: 65%;
+  width: 98%;
 }
 .container .heading {
   font-size: 30px;
@@ -205,7 +205,7 @@ body {
 
 .notes-header-title {
   text-align: center;
-  font-size: 50px;
+  font-size: 40px;
   font-weight: 600;
   margin-top: 20px;
 }
@@ -238,9 +238,10 @@ body {
 }
 
 .language {
-  padding: 0 50px;
+  padding: 0 5px;
 }
 
-/* .convert {
-  margin: 25px 0;
-} */
+.audio-file-to-text {
+  width: 98.9%;
+  align-self: center;
+}
