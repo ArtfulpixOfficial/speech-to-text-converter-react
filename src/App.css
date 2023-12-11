@@ -243,5 +243,6 @@ body {
 
 .audio-file-to-text {
   width: 98.9%;
-  align-self: center;
+  /* align-self: center; */
+  padding: 40px 20px;
 }
