@@ -21,7 +21,8 @@ function App() {
   const [permissions, setPermissions] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState();
   const [disableDownload, setDisableDownload] = useState(true);
-
+  const [converted, setConverted] = useState(true);
+  const [uploaded, setUploaded] = useState(true);
   function loadFile(url, callback) {
     PizZipUtils.getBinaryContent(url, callback);
   }
@@ -45,6 +46,12 @@ function App() {
       />
     ));
     setSections(newSections);
+    if (!converted) {
+      setConverted(true);
+    }
+    if (!uploaded) {
+      setUploaded(true);
+    }
     setDisableDownload(false);
   }
 
@@ -59,11 +66,13 @@ function App() {
       return;
     }
     console.log(selectedFile);
+    setUploaded(false);
     transcribeAudio(selectedFile);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setConverted(false);
     transcribeAudio(fileLink);
   }
 
@@ -201,7 +210,7 @@ function App() {
               }}
             />
             <button className="btn convert">
-              <p>Convert</p>
+              <p>{converted ? "Convert" : "Converting..."}</p>
             </button>
           </form>
           <input
@@ -218,7 +227,7 @@ function App() {
             <div className="icon">
               <ion-icon name="cloud-upload-outline"></ion-icon>
             </div>
-            <p>Upload a MP3/MP4 File</p>
+            <p>{uploaded ? "Upload a MP3/MP4 File" : "Uploading..."}</p>
           </button>
         </div>
       </div>
