@@ -46,12 +46,12 @@ function App() {
       />
     ));
     setSections(newSections);
-    if (!converted) {
-      setConverted(true);
-    }
-    if (!uploaded) {
-      setUploaded(true);
-    }
+    setConverted(true);
+
+    // console.log(uploaded);
+    setUploaded(true);
+    // console.log(uploaded);
+
     setDisableDownload(false);
   }
 
