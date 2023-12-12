@@ -137,8 +137,10 @@ function App() {
       const data = {
         meetingTitle,
         notes: sections.map((section) => ({
+          hasSummary: section.props.details ? true : false,
           title: section.props?.details?.title,
           description: section.props?.details?.description,
+          hasText: section.props.text ? true : false,
           text: section.props.text || null,
         })),
       };
@@ -175,7 +177,11 @@ function App() {
             const audioFile = new File([audioBlob], "recording.wav", {
               type: "audio/wav",
             });
-            transcribeAudio(audioFile);
+            transcribeAudio(
+              audioFile,
+              language === "system" ? "en" : language,
+              "transcript"
+            );
           }
         };
         mediaRecorder.start();
