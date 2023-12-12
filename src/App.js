@@ -12,7 +12,8 @@ function App() {
   const [fileLink, setFileLink] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [sections, setSections] = useState([]);
-  const fileInputRef = useRef(null);
+  const transcriptFileInputRef = useRef(null);
+  const summaryFileInputRef = useRef(null);
   const [language, setLanguage] = useState("system");
   const [recording, setRecording] = useState(false);
   const { startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder(
@@ -32,19 +33,36 @@ function App() {
     const audioFile = new File([audioBlob], "voice.wav", { type: "audio/wav" });
     return audioFile;
   }
-  async function transcribeAudio(audio, language) {
-    const summaryChapters = await audioToText(audio);
+  async function transcribeAudio(audio, language, type) {
+    const summaryChapters = await audioToText(
+      audio,
+      type === "transcript" ? language : "en",
+      type
+    );
+
     if (!summaryChapters) return;
-    setMeetingTitle(summaryChapters[0]?.gist || summaryChapters[0]?.headline);
-    const newSections = summaryChapters.map((chapter, index) => (
-      <Section
-        key={index}
-        details={{
-          title: index === 0 ? "Introduction" : chapter.headline,
-          description: chapter.summary,
-        }}
-      />
-    ));
+    setMeetingTitle(
+      summaryChapters[0]?.gist ||
+        summaryChapters[0]?.headline ||
+        "Transcription of Meeting"
+    );
+
+    let newSections = [];
+    if (type === "transcript") {
+      console.log(type);
+      newSections.push(<TranscriptSection key={1} text={summaryChapters} />);
+    }
+    if (type === "summary") {
+      newSections = summaryChapters.map((chapter, index) => (
+        <Section
+          key={index}
+          details={{
+            title: index === 0 ? "Introduction" : chapter.headline,
+            description: chapter.summary,
+          }}
+        />
+      ));
+    }
     setSections(newSections);
     setConverted(true);
 
@@ -56,7 +74,7 @@ function App() {
   }
 
   function handleButtonClick() {
-    fileInputRef.current.click();
+    transcriptFileInputRef.current.click();
   }
 
   async function handleFileChange(event) {
@@ -67,15 +85,43 @@ function App() {
     }
     console.log(selectedFile);
     setUploaded(false);
-    transcribeAudio(selectedFile);
+    transcribeAudio(
+      selectedFile,
+      language === "system" ? "en" : language,
+      "transcript"
+    );
+  }
+
+  function handleSummaryButtonClick() {
+    summaryFileInputRef.current.click();
+  }
+  async function handleSummaryFileChange(event) {
+    const selectedFile = event.target.files[0];
+    if (!selectedFile) {
+      alert("Please select a file.");
+      return;
+    }
+    console.log(selectedFile);
+    setUploaded(false);
+    transcribeAudio(selectedFile, "en", "summary");
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
+    // console.log(e);
     setConverted(false);
-    transcribeAudio(fileLink);
+    // transcribeAudio(fileLink);
   }
-
+  function handleTranscibeButton() {
+    transcribeAudio(
+      fileLink,
+      language === "system" ? "en" : language,
+      "transcript"
+    );
+  }
+  function handleSummaryButton() {
+    transcribeAudio(fileLink, "en", "summary");
+  }
   async function handleDownload() {
     // Load the Word document template
     loadFile("/template.docx", async function (error, content) {
@@ -91,8 +137,9 @@ function App() {
       const data = {
         meetingTitle,
         notes: sections.map((section) => ({
-          title: section.props.details.title,
-          description: section.props.details.description,
+          title: section.props?.details?.title,
+          description: section.props?.details?.description,
+          text: section.props.text || null,
         })),
       };
 
@@ -195,7 +242,7 @@ function App() {
             src={mediaBlobUrl}
             onCanPlay={async () => {
               const audioObj = await blobToAudio(mediaBlobUrl);
-              transcribeAudio(audioObj, language);
+              transcribeAudio(audioObj, language, "transcript");
             }}
           />
           <form className="link-to-text" onSubmit={handleSubmit}>
@@ -209,14 +256,19 @@ function App() {
                 setFileLink(e.target.value);
               }}
             />
-            <button className="btn convert">
-              <p>{converted ? "Convert" : "Converting..."}</p>
-            </button>
+            <div className="submit-btns">
+              <button className="btn convert" onClick={handleTranscibeButton}>
+                <p>{converted ? "Transcript" : "Converting..."}</p>
+              </button>
+              <button className="btn convert" onClick={handleSummaryButton}>
+                <p>{converted ? "Summary" : "Converting..."}</p>
+              </button>
+            </div>
           </form>
           <input
             type="file"
             accept="audio/*,video/*"
-            ref={fileInputRef}
+            ref={transcriptFileInputRef}
             style={{ display: "none" }}
             onChange={handleFileChange}
           />
@@ -227,7 +279,31 @@ function App() {
             <div className="icon">
               <ion-icon name="cloud-upload-outline"></ion-icon>
             </div>
-            <p>{uploaded ? "Upload a MP3/MP4 File" : "Uploading..."}</p>
+            <p>
+              {uploaded
+                ? "Upload a MP3/MP4 File to transcript"
+                : "Uploading..."}
+            </p>
+          </button>
+          <input
+            type="file"
+            accept="audio/*,video/*"
+            ref={summaryFileInputRef}
+            style={{ display: "none" }}
+            onChange={handleSummaryFileChange}
+          />
+          <button
+            className="btn audio-file-to-text"
+            onClick={handleSummaryButtonClick}
+          >
+            <div className="icon">
+              <ion-icon name="cloud-upload-outline"></ion-icon>
+            </div>
+            <p>
+              {uploaded
+                ? "Upload a MP3/MP4 File to get summary"
+                : "Uploading..."}
+            </p>
           </button>
         </div>
       </div>
@@ -269,6 +345,14 @@ const Section = function ({ details }) {
     <div className="section-details">
       <h2>{details.title}:</h2>
       <p>{details.description}</p>
+    </div>
+  );
+};
+
+const TranscriptSection = function ({ text }) {
+  return (
+    <div className="section-details">
+      <p>{text}</p>
     </div>
   );
 };
