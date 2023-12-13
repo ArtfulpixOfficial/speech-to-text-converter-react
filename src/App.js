@@ -34,11 +34,7 @@ function App() {
     return audioFile;
   }
   async function transcribeAudio(audio, language, type) {
-    const summaryChapters = await audioToText(
-      audio,
-      type === "transcript" ? language : "en",
-      type
-    );
+    const summaryChapters = await audioToText(audio, language, type);
 
     if (!summaryChapters) return;
     setMeetingTitle(
@@ -85,11 +81,7 @@ function App() {
     }
     console.log(selectedFile);
     setUploaded(false);
-    transcribeAudio(
-      selectedFile,
-      language === "system" ? "en" : language,
-      "transcript"
-    );
+    transcribeAudio(selectedFile, language, "transcript");
   }
 
   function handleSummaryButtonClick() {
@@ -103,7 +95,7 @@ function App() {
     }
     console.log(selectedFile);
     setUploaded(false);
-    transcribeAudio(selectedFile, "en", "summary");
+    transcribeAudio(selectedFile, language, "summary");
   }
 
   async function handleSubmit(e) {
@@ -113,14 +105,10 @@ function App() {
     // transcribeAudio(fileLink);
   }
   function handleTranscibeButton() {
-    transcribeAudio(
-      fileLink,
-      language === "system" ? "en" : language,
-      "transcript"
-    );
+    transcribeAudio(fileLink, language, "transcript");
   }
   function handleSummaryButton() {
-    transcribeAudio(fileLink, "en", "summary");
+    transcribeAudio(fileLink, language, "summary");
   }
   async function handleDownload() {
     // Load the Word document template
@@ -177,11 +165,7 @@ function App() {
             const audioFile = new File([audioBlob], "recording.wav", {
               type: "audio/wav",
             });
-            transcribeAudio(
-              audioFile,
-              language === "system" ? "en" : language,
-              "transcript"
-            );
+            transcribeAudio(audioFile, language, "transcript");
           }
         };
         mediaRecorder.start();
@@ -271,46 +255,48 @@ function App() {
               </button>
             </div>
           </form>
-          <input
-            type="file"
-            accept="audio/*,video/*"
-            ref={transcriptFileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
-          <button
-            className="btn audio-file-to-text"
-            onClick={handleButtonClick}
-          >
-            <div className="icon">
-              <ion-icon name="cloud-upload-outline"></ion-icon>
-            </div>
-            <p>
-              {uploaded
-                ? "Upload a MP3/MP4 File to transcript"
-                : "Uploading..."}
-            </p>
-          </button>
-          <input
-            type="file"
-            accept="audio/*,video/*"
-            ref={summaryFileInputRef}
-            style={{ display: "none" }}
-            onChange={handleSummaryFileChange}
-          />
-          <button
-            className="btn audio-file-to-text"
-            onClick={handleSummaryButtonClick}
-          >
-            <div className="icon">
-              <ion-icon name="cloud-upload-outline"></ion-icon>
-            </div>
-            <p>
-              {uploaded
-                ? "Upload a MP3/MP4 File to get summary"
-                : "Uploading..."}
-            </p>
-          </button>
+          <div className="upload-section">
+            <input
+              type="file"
+              accept="audio/*,video/*"
+              ref={transcriptFileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+            <button
+              className="btn audio-file-to-text"
+              onClick={handleButtonClick}
+            >
+              <div className="icon">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+              </div>
+              <p>
+                {uploaded
+                  ? "Upload a MP3/MP4 File to transcript"
+                  : "Uploading..."}
+              </p>
+            </button>
+            <input
+              type="file"
+              accept="audio/*,video/*"
+              ref={summaryFileInputRef}
+              style={{ display: "none" }}
+              onChange={handleSummaryFileChange}
+            />
+            <button
+              className="btn audio-file-to-text"
+              onClick={handleSummaryButtonClick}
+            >
+              <div className="icon">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+              </div>
+              <p>
+                {uploaded
+                  ? "Upload a MP3/MP4 File to get summary"
+                  : "Uploading..."}
+              </p>
+            </button>
+          </div>
         </div>
       </div>
       <div className="notes">
