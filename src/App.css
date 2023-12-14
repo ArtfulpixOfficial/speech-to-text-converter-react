@@ -187,12 +187,12 @@ body {
   width: 98%;
 }
 .container .heading {
-  font-size: 23px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 550;
   /* margin-bottom: 5px; */
   text-align: center;
   color: var(--bg-color);
-  padding: 0 10px;
+  /* padding: 0 10px; */
 }
 
 .download,
@@ -230,8 +230,9 @@ body {
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   margin-bottom: 30px;
+  gap: 15px;
 }
 
 .header-logo {
@@ -244,12 +245,13 @@ body {
 
 .audio-file-to-text {
   min-width: 25%;
-  max-width: 45%;
+  max-width: 100%;
   /* align-self: center; */
-  justify-content: center;
-  align-items: center;
-  padding: 60px 0;
+  /* justify-content: center; */
+  /* align-items: center; */
+  padding: 40px 10px;
   margin-bottom: 0;
+  border-radius: 20px;
 }
 .audio-file-to-text p {
   font-size: 16px;
@@ -274,8 +276,8 @@ body {
   display: flex;
   gap: 10px;
   justify-content: center;
-  /* flex-direction: column; */
-  /* align-items: center; */
+  flex-direction: column;
+  align-items: center;
 }
 
 .record {

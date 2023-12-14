@@ -267,9 +267,6 @@ function App() {
               className="btn audio-file-to-text"
               onClick={handleButtonClick}
             >
-              <div className="icon">
-                {/* <ion-icon name="cloud-upload-outline"></ion-icon> */}
-              </div>
               <p>
                 {uploaded
                   ? "Upload MP3/MP4 File to get transcript"
@@ -287,9 +284,6 @@ function App() {
               className="btn audio-file-to-text"
               onClick={handleSummaryButtonClick}
             >
-              <div className="icon">
-                {/* <ion-icon name="cloud-upload-outline"></ion-icon> */}
-              </div>
               <p>
                 {uploaded
                   ? "Upload MP3/MP4 File to get summary"
