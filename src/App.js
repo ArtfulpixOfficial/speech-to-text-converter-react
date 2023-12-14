@@ -207,7 +207,7 @@ function App() {
                 </option>
               ))}
             </select>
-            <div>
+            <div className="record-btn">
               <button
                 className={`btn record ${
                   permissions && recording ? "recording" : ""
@@ -268,11 +268,11 @@ function App() {
               onClick={handleButtonClick}
             >
               <div className="icon">
-                <ion-icon name="cloud-upload-outline"></ion-icon>
+                {/* <ion-icon name="cloud-upload-outline"></ion-icon> */}
               </div>
               <p>
                 {uploaded
-                  ? "Upload a MP3/MP4 File to transcript"
+                  ? "Upload MP3/MP4 File to get transcript"
                   : "Uploading..."}
               </p>
             </button>
@@ -288,11 +288,11 @@ function App() {
               onClick={handleSummaryButtonClick}
             >
               <div className="icon">
-                <ion-icon name="cloud-upload-outline"></ion-icon>
+                {/* <ion-icon name="cloud-upload-outline"></ion-icon> */}
               </div>
               <p>
                 {uploaded
-                  ? "Upload a MP3/MP4 File to get summary"
+                  ? "Upload MP3/MP4 File to get summary"
                   : "Uploading..."}
               </p>
             </button>
