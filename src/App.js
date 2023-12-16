@@ -317,10 +317,28 @@ function App() {
           </button>
         </div>
         <h1 className="notes-header-title">What note will we take today?</h1>
-        <div className="meeting-details">
-          {meetingTitle ? <h2>Meeting Summary: {meetingTitle}</h2> : ""}
-          {sections}
-        </div>
+        {sections.length === 0 ? (
+          <div className="important-note">
+            <h3>Dear User,</h3>
+            <p className="audio-time-note">
+              Please record atleast 50 seconds so that the audio system can
+              recognize the language.
+            </p>
+            <p>Languages available for transcription with audio system:</p>
+            <ul>
+              {languages
+                .filter((language, index) => language.audioDetection)
+                .map((language, index) => (
+                  <li key={index}>{language.name}</li>
+                ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="meeting-details">
+            {meetingTitle ? <h2>Meeting Summary: {meetingTitle}</h2> : ""}
+            {sections}
+          </div>
+        )}
       </div>
     </div>
   );

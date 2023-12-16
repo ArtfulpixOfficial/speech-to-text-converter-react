@@ -4,6 +4,7 @@ const languages = [
     name: "English",
     native: "English",
     code: "en",
+    audioDetection: true,
   },
   {
     no: "2",
@@ -16,6 +17,7 @@ const languages = [
     name: "Dutch",
     native: "Nederlands",
     code: "nl",
+    audioDetection: true,
   },
   {
     no: "4",
@@ -28,12 +30,14 @@ const languages = [
     name: "French",
     native: "Français",
     code: "fr",
+    audioDetection: true,
   },
   {
     no: "6",
     name: "German",
     native: "Deutsch",
     code: "de",
+    audioDetection: true,
   },
   {
     no: "7",
@@ -46,6 +50,7 @@ const languages = [
     name: "Italian",
     native: "Italiano",
     code: "it",
+    audioDetection: true,
   },
   {
     no: "9",
@@ -70,6 +75,7 @@ const languages = [
     name: "Portuguese",
     native: "Português",
     code: "pt",
+    audioDetection: true,
   },
   {
     no: "13",
@@ -82,6 +88,7 @@ const languages = [
     name: "Spanish",
     native: "Español",
     code: "es",
+    audioDetection: true,
   },
   {
     no: "15",
