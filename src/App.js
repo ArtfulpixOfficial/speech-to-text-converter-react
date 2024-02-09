@@ -189,7 +189,6 @@ function App() {
         <div className="options">
           <div className="header">
             <img src="logo.png" alt="logo" className="header-logo" />
-            <h2 className="heading">MidyAI Notetaker</h2>
           </div>
           <div className="language">
             <select
@@ -240,7 +239,7 @@ function App() {
               type="url"
               name="audio"
               id="audio-link"
-              placeholder="https://www.example.com/demo-file.mp4"
+              placeholder="https://www.example.com/file.mp4"
               value={fileLink}
               onChange={(e) => {
                 setFileLink(e.target.value);
