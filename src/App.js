@@ -188,7 +188,7 @@ function App() {
       <div className="container">
         <div className="options">
           <div className="header">
-            <img src="logo.png" alt="logo" className="header-logo" />
+            <img src="logo_light.png" alt="logo" className="header-logo" />
           </div>
           <div className="language">
             <select
@@ -302,7 +302,7 @@ function App() {
             <ion-icon name="cloud-download-outline"></ion-icon>
             <p>Download Note</p>
           </button>
-          <img src="logo.png" alt="logo" className="logo" />
+          <img src="logo_dark.png" alt="logo" className="logo" />
           <button
             className="btn clear"
             onClick={() => {
