@@ -325,3 +325,17 @@ body {
   content: "-";
   text-indent: -5px;
 }
+@media screen and (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+  }
+  .container {
+    width: 100%;
+    padding: 0 10px;
+  }
+  .notes {
+    width: 100%;
+    min-height: auto;
+  }
+}
+
