@@ -336,6 +336,23 @@ body {
   .notes {
     width: 100%;
     min-height: auto;
+    padding: 10px;
+  }
+  .header {
+    justify-content: center;
+  }
+
+  .audio-file-to-text {
+    max-width: 75%;
+  }
+
+  .buttons {
+    align-items: flex-start;
+  }
+
+  .important-note {
+    width: 90%;
   }
 }
+
 
