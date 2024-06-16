@@ -9,6 +9,7 @@ import PizZipUtils from "pizzip/utils/index.js";
 import { saveAs } from "file-saver";
 
 function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [fileLink, setFileLink] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [sections, setSections] = useState([]);
@@ -186,111 +187,120 @@ function App() {
   return (
     <div className="main-container">
       <div className="container">
-        <div className="options">
-          <div className="header">
-            <img src="logo_light.png" alt="logo" className="header-logo" />
-          </div>
-          <div className="language">
-            <select
-              name="input-language"
-              id="language"
-              value={language}
-              onChange={(e) => {
-                setLanguage(e.target.value);
-              }}
-            >
-              <option value={"system"}>System Audio</option>
-              {languages.map((language) => (
-                <option value={language.code} key={language.no}>
-                  {language.name}
-                </option>
-              ))}
-            </select>
-            <div className="record-btn">
-              <button
-                className={`btn record ${
-                  permissions && recording ? "recording" : ""
-                }`}
-                onClick={handleRecordButton}
-              >
-                <div className="icon">
-                  <ion-icon name="mic-outline"></ion-icon>
-                  <img src="bars.svg" alt="" />
-                </div>
-                <p>{`${
-                  !permissions && !recording
-                    ? "Get Permissions"
-                    : permissions && !recording
-                    ? "Start Listening"
-                    : "Listening"
-                } `}</p>
-              </button>
-            </div>
-          </div>
-          <audio
-            src={mediaBlobUrl}
-            onCanPlay={async () => {
-              const audioObj = await blobToAudio(mediaBlobUrl);
-              transcribeAudio(audioObj, language, "transcript");
-            }}
+        <div className="menu-icon" onClick={() => setIsMenuOpen((v) => !v)}>
+          <img
+            src="icons8-hamburger-menu.svg"
+            alt="menu-logo"
+            className="menu-logo"
           />
-          <form className="link-to-text" onSubmit={handleSubmit}>
-            <input
-              type="url"
-              name="audio"
-              id="audio-link"
-              placeholder="https://www.example.com/file.mp4"
-              value={fileLink}
-              onChange={(e) => {
-                setFileLink(e.target.value);
+        </div>
+        {isMenuOpen && (
+          <div className="options">
+            <div className="header">
+              <img src="logo_light.png" alt="logo" className="header-logo" />
+            </div>
+            <div className="language">
+              <select
+                name="input-language"
+                id="language"
+                value={language}
+                onChange={(e) => {
+                  setLanguage(e.target.value);
+                }}
+              >
+                <option value={"system"}>System Audio</option>
+                {languages.map((language) => (
+                  <option value={language.code} key={language.no}>
+                    {language.name}
+                  </option>
+                ))}
+              </select>
+              <div className="record-btn">
+                <button
+                  className={`btn record ${
+                    permissions && recording ? "recording" : ""
+                  }`}
+                  onClick={handleRecordButton}
+                >
+                  <div className="icon">
+                    <ion-icon name="mic-outline"></ion-icon>
+                    <img src="bars.svg" alt="" />
+                  </div>
+                  <p>{`${
+                    !permissions && !recording
+                      ? "Get Permissions"
+                      : permissions && !recording
+                      ? "Start Listening"
+                      : "Listening"
+                  } `}</p>
+                </button>
+              </div>
+            </div>
+            <audio
+              src={mediaBlobUrl}
+              onCanPlay={async () => {
+                const audioObj = await blobToAudio(mediaBlobUrl);
+                transcribeAudio(audioObj, language, "transcript");
               }}
             />
-            <div className="submit-btns">
-              <button className="btn convert" onClick={handleTranscibeButton}>
-                <p>{converted ? "Transcript" : "Converting..."}</p>
+            <form className="link-to-text" onSubmit={handleSubmit}>
+              <input
+                type="url"
+                name="audio"
+                id="audio-link"
+                placeholder="https://www.example.com/file.mp4"
+                value={fileLink}
+                onChange={(e) => {
+                  setFileLink(e.target.value);
+                }}
+              />
+              <div className="submit-btns">
+                <button className="btn convert" onClick={handleTranscibeButton}>
+                  <p>{converted ? "Transcript" : "Converting..."}</p>
+                </button>
+                <button className="btn convert" onClick={handleSummaryButton}>
+                  <p>{converted ? "Summary" : "Converting..."}</p>
+                </button>
+              </div>
+            </form>
+            <div className="upload-section">
+              <input
+                type="file"
+                accept="audio/*,video/*"
+                ref={transcriptFileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <button
+                className="btn audio-file-to-text"
+                onClick={handleButtonClick}
+              >
+                <p>
+                  {uploaded
+                    ? "Upload MP3/MP4 File to get transcript"
+                    : "Uploading..."}
+                </p>
               </button>
-              <button className="btn convert" onClick={handleSummaryButton}>
-                <p>{converted ? "Summary" : "Converting..."}</p>
+              <input
+                type="file"
+                accept="audio/*,video/*"
+                ref={summaryFileInputRef}
+                style={{ display: "none" }}
+                onChange={handleSummaryFileChange}
+              />
+              <button
+                className="btn audio-file-to-text"
+                onClick={handleSummaryButtonClick}
+              >
+                <p>
+                  {uploaded
+                    ? "Upload MP3/MP4 File to get summary"
+                    : "Uploading..."}
+                </p>
               </button>
             </div>
-          </form>
-          <div className="upload-section">
-            <input
-              type="file"
-              accept="audio/*,video/*"
-              ref={transcriptFileInputRef}
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-            <button
-              className="btn audio-file-to-text"
-              onClick={handleButtonClick}
-            >
-              <p>
-                {uploaded
-                  ? "Upload MP3/MP4 File to get transcript"
-                  : "Uploading..."}
-              </p>
-            </button>
-            <input
-              type="file"
-              accept="audio/*,video/*"
-              ref={summaryFileInputRef}
-              style={{ display: "none" }}
-              onChange={handleSummaryFileChange}
-            />
-            <button
-              className="btn audio-file-to-text"
-              onClick={handleSummaryButtonClick}
-            >
-              <p>
-                {uploaded
-                  ? "Upload MP3/MP4 File to get summary"
-                  : "Uploading..."}
-              </p>
-            </button>
           </div>
-        </div>
+        )}
       </div>
       <div className="notes">
         <div className="buttons">
