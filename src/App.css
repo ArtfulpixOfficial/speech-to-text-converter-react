@@ -382,5 +382,13 @@ body {
   .options {
     background-color: var(--light-text-color);
     padding-bottom: 20px;
+    border-radius: 5%;
   }
 }
+
+@media screen and (min-width: 769px) {
+  .options {
+    display: block !important;
+  }
+}
+
