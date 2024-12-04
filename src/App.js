@@ -145,7 +145,9 @@ function App() {
       saveAs(outputBuffer, "meeting_notes.docx");
     });
   }
-
+  async function getPermissionsOnChange(e) {
+    setLanguage(e.target.value);
+  }
   async function handleRecordButton() {
     if (!permissions) {
       if (language === "system") {
@@ -201,17 +203,13 @@ function App() {
             display: `${isMenuOpen ? "block" : "none"}`,
           }}
         >
-          <div className="header">
-            <img src="logo_light.png" alt="logo" className="header-logo" />
-          </div>
           <div className="language">
+            <img src="mic.png" alt="logo" />
             <select
               name="input-language"
               id="language"
               value={language}
-              onChange={(e) => {
-                setLanguage(e.target.value);
-              }}
+              onChange={getPermissionsOnChange}
             >
               <option value={"system"}>System Audio</option>
               {languages.map((language) => (
@@ -220,6 +218,7 @@ function App() {
                 </option>
               ))}
             </select>
+
             <div className="record-btn">
               <button
                 className={`btn record ${
@@ -248,26 +247,7 @@ function App() {
               transcribeAudio(audioObj, language, "transcript");
             }}
           />
-          <form className="link-to-text" onSubmit={handleSubmit}>
-            <input
-              type="url"
-              name="audio"
-              id="audio-link"
-              placeholder="https://www.example.com/file.mp4"
-              value={fileLink}
-              onChange={(e) => {
-                setFileLink(e.target.value);
-              }}
-            />
-            <div className="submit-btns">
-              <button className="btn convert" onClick={handleTranscibeButton}>
-                <p>{converted ? "Transcript" : "Converting..."}</p>
-              </button>
-              <button className="btn convert" onClick={handleSummaryButton}>
-                <p>{converted ? "Summary" : "Converting..."}</p>
-              </button>
-            </div>
-          </form>
+
           <div className="upload-section">
             <input
               type="file"
@@ -276,6 +256,7 @@ function App() {
               style={{ display: "none" }}
               onChange={handleFileChange}
             />
+            <img src="file.png" alt="logo" />
             <button
               className="btn audio-file-to-text"
               onClick={handleButtonClick}
@@ -293,6 +274,7 @@ function App() {
               style={{ display: "none" }}
               onChange={handleSummaryFileChange}
             />
+            <img src="file.png" alt="logo" />
             <button
               className="btn audio-file-to-text"
               onClick={handleSummaryButtonClick}
@@ -316,7 +298,7 @@ function App() {
             <ion-icon name="cloud-download-outline"></ion-icon>
             <p>Download Note</p>
           </button>
-          <img src="logo_dark.png" alt="logo" className="logo" />
+          <img src="logo.png" alt="logo" className="logo" />
           <button
             className="btn clear"
             onClick={() => {
@@ -329,7 +311,10 @@ function App() {
             <p>Clear Note</p>
           </button>
         </div>
-        <h1 className="notes-header-title">What note will we take today?</h1>
+        <h1 className="notes-header-title">MIDYAI SPEECH-TO-TEXT</h1>
+        <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-400">
+          What Note will we take today?
+        </h2>
         {sections.length === 0 ? (
           <div className="important-note">
             <h3>Dear User,</h3>
